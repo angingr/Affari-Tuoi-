@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affari Tuoi - Mini Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .pacchi {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
+        }
+        .pacco {
+            width: 80px;
+            height: 80px;
+            margin: 10px;
+            background-color: #FFD700;
+            border: 2px solid #000;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .pacco.open {
+            background-color: #FF6347;
+            cursor: not-allowed;
+        }
+        .offer {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Affari Tuoi - Mini Game</h1>
+    <p>Scegli un pacco e scopri il contenuto!</p>
+    <div class="pacchi" id="pacchiContainer"></div>
+    <div class="offer" id="offer"></div>
+    <button id="endGame" style="display: none;" onclick="endGame()">Scopri il tuo pacco!</button>
+
+    <script>
+        const prizes = [1, 10, 100, 1000, 10000, 100000];
+        const pacchi = [];
+        const selectedPacco = { index: null };
+        let remainingPrizes = [...prizes];
+        let openedPacchi = 0;
+
+        // Generate random prizes for pacchi
+        function generatePacchi() {
+            let shuffledPrizes = [...prizes];
+            for (let i = 0; i < 6; i++) {
+                const randomIndex = Math.floor(Math.random() * shuffledPrizes.length);
+                pacchi.push(shuffledPrizes.splice(randomIndex, 1)[0]);
+            }
+        }
+
+        // Render pacchi
+        function renderPacchi() {
+            const container = document.getElementById('pacchiContainer');
+            container.innerHTML = '';
+            pacchi.forEach((_, index) => {
+                const pacco = document.createElement('div');
+                pacco.className = 'pacco';
+                pacco.innerText = index + 1;
+                pacco.onclick = () => openPacco(index);
+                container.appendChild(pacco);
+            });
+        }
+
+        // Open a pacco
+        function openPacco(index) {
+            if (selectedPacco.index === null) {
+                alert('Seleziona prima il tuo pacco!');
+                return;
+            }
+            if (index === selectedPacco.index) {
+                alert('Questo è il tuo pacco, scegli un altro!');
+                return;
+            }
+            const paccoElement = document.querySelectorAll('.pacco')[index];
+            if (paccoElement.classList.contains('open')) return;
+
+            paccoElement.classList.add('open');
+            paccoElement.innerText = `€${pacchi[index]}`;
+            remainingPrizes = remainingPrizes.filter(prize => prize !== pacchi[index]);
+            openedPacchi++;
+
+            if (openedPacchi === pacchi.length - 1) {
+                document.getElementById('endGame').style.display = 'inline-block';
+            } else {
+                makeOffer();
+            }
+        }
+
+        // Select your pacco
+        function selectYourPacco(index) {
+            selectedPacco.index = index;
+            alert(`Hai selezionato il pacco ${index + 1}! Apri gli altri pacchi per scoprire l'offerta.`);
+        }
+
+        // Make an offer
+        function makeOffer() {
+            const average = remainingPrizes.reduce((sum, prize) => sum + prize, 0) / remainingPrizes.length;
+            const offer = Math.round(average * (0.8 + Math.random() * 0.4));
+            document.getElementById('offer').innerText = `Offerta del dottore: €${offer}`;
+        }
+
+        // End the game
+        function endGame() {
+            const prize = pacchi[selectedPacco.index];
+            alert(`Hai vinto il premio del tuo pacco: €${prize}`);
+            location.reload();
+        }
+
+        // Initialize game
+        generatePacchi();
+        renderPacchi();
+
+        // Select a random pacco for the player
+        const randomPacco = Math.floor(Math.random() * pacchi.length);
+        selectYourPacco(randomPacco);
+    </script>
+</body>
+</html>
